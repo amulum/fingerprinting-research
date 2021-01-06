@@ -1,89 +1,102 @@
 <template>
-  <v-row justify="center" align="center">
-    <v-col cols="12" sm="8" md="6">
-      <div class="text-center">
-        <logo />
-        <vuetify-logo />
-      </div>
-      <v-card>
-        <v-card-title class="headline">
-          Welcome to the Vuetify + Nuxt.js template
-        </v-card-title>
-        <v-card-text>
-          <p>Vuetify is a progressive Material Design component framework for Vue.js. It was designed to empower developers to create amazing applications.</p>
-          <p>
-            For more information on Vuetify, check out the <a
-              href="https://vuetifyjs.com"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              documentation
-            </a>.
-          </p>
-          <p>
-            If you have questions, please join the official <a
-              href="https://chat.vuetifyjs.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="chat"
-            >
-              discord
-            </a>.
-          </p>
-          <p>
-            Find a bug? Report it on the github <a
-              href="https://github.com/vuetifyjs/vuetify/issues"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="contribute"
-            >
-              issue board
-            </a>.
-          </p>
-          <p>Thank you for developing with Vuetify and I look forward to bringing more exciting features in the future.</p>
-          <div class="text-xs-right">
-            <em><small>&mdash; John Leider</small></em>
-          </div>
-          <hr class="my-3">
-          <a
-            href="https://nuxtjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
+  <v-container>
+    <v-row justify="center" align="center" class="flex-column">
+      <v-col>
+        <v-row justify="center" align="center" class="flex-column">
+          <div class="text-h5">FingerprintJS Free</div>
+          <span class="text-h6">
+            <b>{{ visitorId }}</b>
+          </span>
+        </v-row>
+      </v-col>
+      <v-spacer class="mt-4"></v-spacer>
+      <v-col>
+        <v-row justify="center" align="center" class="flex-column">
+          <div class="text-h5">Canvas FingerPrinting</div>
+          <span class="text-h6">
+            <b>{{ canvasId }}</b>
+          </span>
+        </v-row>
+      </v-col>
+      <v-spacer class="mt-4"></v-spacer>
+      <v-col>
+        <v-row justify="center" align="center" class="flex-column">
+          <div class="text-h5">Audio DeviceId</div>
+          <span
+            class="text-h6"
+            v-for="(item, index) in audioDevices"
+            :key="index"
           >
-            Nuxt Documentation
-          </a>
-          <br>
-          <a
-            href="https://github.com/nuxt/nuxt.js"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Nuxt GitHub
-          </a>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn
-            color="primary"
-            nuxt
-            to="/inspire"
-          >
-            Continue
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-col>
-  </v-row>
+            <b>{{ item.deviceId || "" }}</b>
+          </span>
+        </v-row>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
-<script>
-import Logo from '~/components/Logo.vue'
-import VuetifyLogo from '~/components/VuetifyLogo.vue'
+<script lang="ts">
+import { Component, Vue, Watch } from "nuxt-property-decorator";
+import FingerprintJS from "@fingerprintjs/fingerprintjs";
 
-export default {
-  components: {
-    Logo,
-    VuetifyLogo
+@Component({})
+export default class HomePage extends Vue {
+  visitorId: string = "";
+  canvasId: string = "";
+  audioDevices: MediaDeviceInfo[] = [];
+
+  async mounted(): Promise<void> {
+    // FINGERPRINTJS FREE METHOD
+    const fp = await FingerprintJS.load();
+    const result = await fp.get();
+    if (result) {
+      this.visitorId = result.visitorId;
+    }
+
+    // CANVAS FINGERPRINT METHOD
+    this.canvasId = this.canvasFingerprint();
+
+    // METHOD AUDIO DEVICE ID
+    const getUserMedia = await navigator.mediaDevices.getUserMedia({
+      audio: true
+    });
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    this.audioDevices = devices.filter(item => {
+      return !["", "default"].includes(item.deviceId);
+    });
+  }
+
+  canvasFingerprint(): any {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const txt = "i9asdm..$#po((^@KbXrww!~cz";
+
+    if (ctx) {
+      ctx.textBaseline = "top";
+      ctx.font = "14px 'Arial'";
+      ctx.textBaseline = "alphabetic";
+      ctx.rotate(0.05);
+      ctx.fillStyle = "#f60";
+      ctx.fillRect(125, 1, 62, 20);
+      ctx.fillStyle = "#069";
+      ctx.fillText(txt, 2, 15);
+      ctx.fillStyle = "rgba(111, 111, 0, 0.7)";
+      ctx.fillText(txt, 4, 17);
+      ctx.shadowBlur = 5;
+      ctx.shadowColor = "purple";
+      ctx.fillRect(-20, 10, 234, 5);
+      const strng = canvas.toDataURL();
+
+      let char;
+      let hash = 0;
+      if (strng.length == 0) return "";
+      for (let i = 0; i < strng.length; i++) {
+        char = strng.charCodeAt(i);
+        hash = (hash << 5) - hash + char;
+        hash = hash & hash;
+      }
+      return hash?.toString() || "";
+    }
   }
 }
 </script>
