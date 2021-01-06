@@ -69,7 +69,7 @@ export default class HomePage extends Vue {
   canvasFingerprint(): any {
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
-    const txt = "i9asdm..$#po((^@KbXrww!~cz";
+    const txt = "i6qwem..$po((^&Kbxrww!~qu";
 
     if (ctx) {
       ctx.textBaseline = "top";
@@ -95,6 +95,7 @@ export default class HomePage extends Vue {
         hash = (hash << 10) - hash + char;
         hash = hash & hash;
       }
+      canvas.remove();
       return Math.abs(hash)?.toString() || "";
     }
   }
