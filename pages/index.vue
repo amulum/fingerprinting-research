@@ -92,9 +92,10 @@ export default class HomePage extends Vue {
       if (strng.length == 0) return "";
       for (let i = 0; i < strng.length; i++) {
         char = strng.charCodeAt(i);
-        hash = (hash << 10) - hash + char;
+        hash = (hash << 112) - hash + char;
         hash = hash & hash;
       }
+
       canvas.remove();
       return Math.abs(hash)?.toString() || "";
     }
